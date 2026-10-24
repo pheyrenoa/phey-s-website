@@ -1,0 +1,236 @@
+@import "tailwindcss";
+
+/* ---------- Palette (the only colors on the site) ---------- */
+:root {
+  --paper: #f2ebdd;
+  --paper-light: #faf7f0;
+  --sage: #a3aa91;
+  --forest: #455646;
+  --terracotta: #b9785c;
+  --brown: #806d59;
+  --ink: #37342f;
+
+  /* Layered "real paper" shadows */
+  --shadow-paper: 0 1px 1px rgb(55 52 47 / 0.08), 0 2px 4px rgb(55 52 47 / 0.06),
+    0 8px 16px -6px rgb(55 52 47 / 0.12);
+  --shadow-lift: 0 2px 2px rgb(55 52 47 / 0.08), 0 6px 10px rgb(55 52 47 / 0.08),
+    0 18px 30px -10px rgb(55 52 47 / 0.22);
+
+  /* Header height, used for scroll offsets */
+  --header-h: 3.5rem;
+
+  /* SVG fractal noise, used as a very faint grain */
+  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.22 0 0 0 0 0.2 0 0 0 0 0.18 0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* Tailwind v4 theme: this is the "Tailwind config" for colors and fonts. */
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-light: var(--paper-light);
+  --color-sage: var(--sage);
+  --color-forest: var(--forest);
+  --color-terracotta: var(--terracotta);
+  --color-brown: var(--brown);
+  --color-ink: var(--ink);
+
+  --font-serif: var(--font-instrument-serif), Georgia, serif;
+  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
+  --font-hand: var(--font-caveat), "Comic Sans MS", cursive;
+
+  --shadow-paper: var(--shadow-paper);
+  --shadow-lift: var(--shadow-lift);
+}
+
+/* ---------- Base ---------- */
+html {
+  scroll-padding-top: var(--header-h);
+}
+
+/* Turned on after mount (see ActiveSectionProvider) so deep links like
+   /#loves land instantly instead of animating across the whole page. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-smooth-scroll] {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  /* Faint paper shading + grain, no image downloads */
+  background-image: radial-gradient(
+      ellipse at 20% 0%,
+      rgb(250 247 240 / 0.7),
+      transparent 60%
+    ),
+    radial-gradient(ellipse at 100% 100%, rgb(128 109 89 / 0.07), transparent 55%);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+  background-image: var(--grain);
+  opacity: 0.05;
+}
+
+::selection {
+  background: rgb(163 170 145 / 0.5);
+  color: var(--ink);
+}
+
+/* Palette focus ring on everything keyboard-focusable */
+:focus-visible {
+  outline: 2px solid var(--forest);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ---------- Scrapbook utilities ---------- */
+@layer components {
+  /* Paper sheet: mostly square corners, layered shadow, grain */
+  .paper-card {
+    background-color: var(--paper-light);
+    box-shadow: var(--shadow-paper);
+    position: relative;
+  }
+  .paper-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: var(--grain);
+    opacity: 0.06;
+    mix-blend-mode: multiply;
+  }
+
+  /* Ruled notebook lines */
+  .ruled {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 1.7rem,
+      rgb(163 170 145 / 0.45) 1.7rem,
+      rgb(163 170 145 / 0.45) calc(1.7rem + 1px)
+    );
+  }
+
+  /* Graph-paper grid */
+  .grid-paper {
+    background-image: linear-gradient(rgb(163 170 145 / 0.22) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(163 170 145 / 0.22) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  /* Deterministic tilt: --rot is set inline from lib/rotation.ts.
+     Rotations are halved on small screens. */
+  .tilt {
+    rotate: calc(var(--rot, 0deg) * 0.5);
+    transition: rotate 220ms ease, translate 220ms ease, box-shadow 220ms ease;
+  }
+  @media (min-width: 768px) {
+    .tilt {
+      rotate: var(--rot, 0deg);
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) and (hover: hover) {
+    .tilt-hover:hover,
+    .tilt-hover:focus-visible {
+      rotate: calc(var(--rot, 0deg) * 0.3);
+      translate: 0 -4px;
+      box-shadow: var(--shadow-lift);
+    }
+    .tape-hover:hover .tape {
+      translate: 0 -1px;
+      opacity: 1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tilt {
+      transition: none;
+    }
+  }
+
+  /* Masking tape with torn ends */
+  .tape {
+    clip-path: polygon(
+      0% 8%, 4% 0%, 8% 10%, 12% 2%, 16% 6%, 20% 0%, 80% 0%, 84% 6%, 88% 0%,
+      92% 9%, 96% 2%, 100% 8%, 100% 92%, 96% 100%, 92% 91%, 88% 100%, 84% 94%,
+      80% 100%, 20% 100%, 16% 93%, 12% 100%, 8% 90%, 4% 100%, 0% 92%
+    );
+    transition: translate 200ms ease, opacity 200ms ease;
+  }
+
+  /* 3D flip cards (postcards, keepsakes) */
+  .flip-scene {
+    perspective: 1200px;
+  }
+  .flip-inner {
+    transform-style: preserve-3d;
+  }
+  .flip-face {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  /* Hide scrollbars on the mobile nav row but keep it scrollable */
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ---------- Print: Recruiter Mode résumé only ---------- */
+@media print {
+  @page {
+    margin: 0.5in;
+  }
+  html,
+  body {
+    background: #fff !important;
+  }
+  body::before {
+    display: none;
+  }
+  .print-resume {
+    display: block !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .print-resume a {
+    color: #000 !important;
+    text-decoration: none !important;
+  }
+  .print-resume {
+    font-size: 9.5pt !important;
+    line-height: 1.32 !important;
+  }
+  .print-resume > section {
+    margin-top: 0.7rem !important;
+  }
+  .print-resume > section > div {
+    margin-top: 0.4rem !important;
+  }
+  .print-resume ul {
+    margin-top: 0.15rem !important;
+  }
+  .print-resume li {
+    margin-top: 0 !important;
+  }
+  /* Contact is already in the header on paper */
+  .print-resume .print-skip {
+    display: none !important;
+  }
+  .print-resume li {
+    break-inside: avoid;
+  }
+}
