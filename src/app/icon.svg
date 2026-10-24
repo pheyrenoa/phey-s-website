@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="10" y="8" width="44" height="50" rx="1" fill="#faf7f0" stroke="#806d59" stroke-width="2" transform="rotate(-6 32 33)"/>
+  <rect x="16" y="13" width="32" height="30" fill="#a3aa91" transform="rotate(-6 32 33)"/>
+  <rect x="22" y="3" width="20" height="9" fill="#b9785c" opacity="0.85" transform="rotate(4 32 8)"/>
+  <text x="32" y="38" font-family="Georgia, serif" font-size="22" text-anchor="middle" fill="#37342f" transform="rotate(-6 32 33)">P</text>
+</svg>
